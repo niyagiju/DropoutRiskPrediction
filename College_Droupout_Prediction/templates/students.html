@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Database</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='Style.css') }}">
+</head>
+
+<body>
+    <div class="bg-shape"></div>
+    <main class="container">
+        <header class="top-header card reveal">
+            <h2>Dropout Risk Dashboard</h2>
+            <nav class="top-nav">
+                <a href="/" class="nav-link {% if current_page == 'predict' %}active{% endif %}">Add Details & Predict</a>
+                <a href="/students" class="nav-link {% if current_page == 'students' %}active{% endif %}">Student Database</a>
+            </nav>
+        </header>
+
+        <section class="card reveal">
+            <h1>Student Database</h1>
+            <p class="subtitle">Stored student details and AI risk predictions</p>
+
+            {% if students and students|length > 0 %}
+            <div class="table-wrap">
+                <table class="student-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Class</th>
+                            <th>Attendance</th>
+                            <th>Marks</th>
+                            <th>Parental Support</th>
+                            <th>Family Income</th>
+                            <th>Risk</th>
+                            <th>Score</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ student.id }}</td>
+                            <td>{{ student.name }}</td>
+                            <td>{{ student.age }}</td>
+                            <td>{{ student.class_name }}</td>
+                            <td>{{ student.attendance }}</td>
+                            <td>{{ student.marks }}</td>
+                            <td>{{ student.parental_support }}</td>
+                            <td>{{ student.family_income }}</td>
+                            <td class="risk-cell {{ student.risk_label|lower|replace(' ', '-') }}">{{ student.risk_label }}</td>
+                            <td>{{ student.risk_score }}</td>
+                            <td>{{ student.created_at }}</td>
+                            <td>
+                                <form action="/delete-student/{{ student.id }}" method="post" onsubmit="return confirm('Delete this student record?');">
+                                    <button type="submit" class="delete-btn">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="safe-note">No student records found yet.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+
+</html>

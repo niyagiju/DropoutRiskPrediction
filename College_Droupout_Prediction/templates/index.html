@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Girl Student Dropout Risk</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='Style.css') }}">
+</head>
+
+<body>
+    <div class="bg-shape"></div>
+    <main class="container">
+        <header class="top-header card reveal">
+            <h2>Dropout Risk Dashboard</h2>
+            <nav class="top-nav">
+                <a href="/" class="nav-link {% if current_page == 'predict' %}active{% endif %}">Add Details & Predict</a>
+                <a href="/students" class="nav-link {% if current_page == 'students' %}active{% endif %}">Student Database</a>
+            </nav>
+        </header>
+
+        <section class="card">
+            <h1>Girl Student Dropout Risk</h1>
+            <p class="subtitle">Minimal AI-assisted screening for early intervention</p>
+
+            <form action="/predict" method="post" class="form-grid">
+                <label for="name">Student Name</label>
+                <input id="name" type="text" name="name" required placeholder="Enter full name">
+
+                <div class="grid-two">
+                    <div>
+                        <label for="age">Age</label>
+                        <input id="age" type="number" name="age" min="10" max="25" required>
+                    </div>
+                    <div>
+                        <label for="class_name">Class</label>
+                        <input id="class_name" type="text" name="class_name" required placeholder="e.g. 10th / 1st Year">
+                    </div>
+                </div>
+
+                <div class="grid-two">
+                    <div>
+                        <label for="attendance">Attendance (%)</label>
+                        <input id="attendance" type="number" name="attendance" min="0" max="100" required>
+                    </div>
+                    <div>
+                        <label for="marks">Average Marks (%)</label>
+                        <input id="marks" type="number" name="marks" min="0" max="100" required>
+                    </div>
+                </div>
+
+                <label for="parental_support">Parental Support</label>
+                <select id="parental_support" name="parental_support" required>
+                    <option value="high">High</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="low">Low</option>
+                </select>
+
+                <label for="family_income">Family Income Stability</label>
+                <select id="family_income" name="family_income" required>
+                    <option value="high">High</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="low">Low</option>
+                </select>
+
+       
+
+                <button type="submit">Predict Risk</button>
+            </form>
+        </section>
+    </main>
+
+    <footer class="footer-note">Built for proactive support, not punitive action.</footer>
+
+    <script>
+        document.querySelectorAll('.card, .footer-note').forEach((el, index) => {
+            el.style.animationDelay = `${index * 0.12}s`;
+            el.classList.add('reveal');
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='Style.css') }}">
+</head>
+
+<body>
+    <div class="bg-shape"></div>
+    <main class="container">
+        <header class="top-header card reveal">
+            <h2>Dropout Risk Dashboard</h2>
+            <nav class="top-nav">
+                <a href="/" class="nav-link {% if current_page == 'predict' %}active{% endif %}">Add Details & Predict</a>
+                <a href="/students" class="nav-link {% if current_page == 'students' %}active{% endif %}">Student Database</a>
+            </nav>
+        </header>
+
+        <section class="card result-card reveal">
+            <p class="pill">Assessment Complete</p>
+            <h1>{{ name }}</h1>
+
+            <p class="score-label">Predicted Risk Level</p>
+            <h2 class="result {{ risk|lower|replace(' ', '-') }}">{{ risk }}</h2>
+            <p class="score-number">Risk Score: {{ score }}/100</p>
+
+            {% if factors and factors|length > 0 %}
+            <h3>Top Contributing Factors</h3>
+            <ul class="factor-list">
+                {% for factor in factors %}
+                <li>{{ factor }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="safe-note">No major risk signals detected.</p>
+            {% endif %}
+
+            {% if db_saved %}
+            <p class="db-status success">Saved to database successfully.</p>
+            {% else %}
+            <p class="db-status warning">Prediction generated, but database save was skipped.</p>
+            {% endif %}
+
+            <a class="back-link" href="/">Analyze Another Student</a>
+            <a class="back-link" href="/students">View Student Database</a>
+        </section>
+    </main>
+</body>
+
+</html>
