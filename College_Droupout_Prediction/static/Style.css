@@ -297,6 +297,95 @@ h3 {
     filter: brightness(0.95);
 }
 
+/* ── Dark mode variables ── */
+[data-theme="dark"] {
+    --bg-start: #1a1a2e;
+    --bg-end: #16213e;
+    --ink: #e5e7eb;
+    --muted: #9ca3af;
+    --card: #1f2937;
+    --stroke: #374151;
+}
+
+[data-theme="dark"] body {
+    background: radial-gradient(circle at 10% 20%, #1f2937 0%, transparent 30%),
+        linear-gradient(145deg, var(--bg-start), var(--bg-end));
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select {
+    background: #111827;
+    border-color: #374151;
+    color: var(--ink);
+}
+
+[data-theme="dark"] .nav-link {
+    color: #f0a45d;
+    border-color: #374151;
+    background: #1f2937;
+}
+
+[data-theme="dark"] .nav-link.active {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    color: #fff;
+    border-color: transparent;
+}
+
+[data-theme="dark"] .student-table th {
+    background: #111827;
+    color: #f0a45d;
+}
+
+[data-theme="dark"] .student-table th,
+[data-theme="dark"] .student-table td {
+    border-bottom-color: #374151;
+}
+
+[data-theme="dark"] .pill {
+    color: #f0a45d;
+    background: #1f2937;
+    border-color: #374151;
+}
+
+[data-theme="dark"] .footer-note {
+    color: #9ca3af;
+}
+
+[data-theme="dark"] .bg-shape {
+    background: linear-gradient(120deg, rgba(197, 101, 42, 0.12), rgba(240, 164, 93, 0.04));
+}
+
+[data-theme="dark"] .db-status.success {
+    background: #052e16;
+    color: #6ee7b7;
+}
+
+[data-theme="dark"] .db-status.warning {
+    background: #2d1a00;
+    color: #fcd34d;
+}
+
+/* ── Theme toggle button ── */
+.theme-toggle {
+    margin-top: 0;
+    border: 1px solid #e5c8ab;
+    border-radius: 999px;
+    padding: 7px 11px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: #8a4b1e;
+    background: #fff5e9;
+    line-height: 1;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+[data-theme="dark"] .theme-toggle {
+    border-color: #374151;
+    background: #1f2937;
+    color: #f0a45d;
+}
+
 .reveal {
     animation: revealUp 0.55s ease both;
 }

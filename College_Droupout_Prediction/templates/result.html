@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Risk Result</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='Style.css') }}">
+    <script>if(localStorage.getItem('theme')==='dark')document.documentElement.setAttribute('data-theme','dark');</script>
 </head>
 
 <body>
@@ -16,6 +17,7 @@
             <nav class="top-nav">
                 <a href="/" class="nav-link {% if current_page == 'predict' %}active{% endif %}">Add Details & Predict</a>
                 <a href="/students" class="nav-link {% if current_page == 'students' %}active{% endif %}">Student Database</a>
+                <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode">🌙</button>
             </nav>
         </header>
 
@@ -48,6 +50,25 @@
             <a class="back-link" href="/students">View Student Database</a>
         </section>
     </main>
+
+    <script>
+        // Dark / light mode toggle
+        const _html = document.documentElement;
+        const _btn = document.getElementById('themeToggle');
+        _btn.textContent = _html.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+        _btn.addEventListener('click', () => {
+            const dark = _html.getAttribute('data-theme') === 'dark';
+            if (dark) {
+                _html.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                _btn.textContent = '🌙';
+            } else {
+                _html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                _btn.textContent = '☀️';
+            }
+        });
+    </script>
 </body>
 
 </html>
