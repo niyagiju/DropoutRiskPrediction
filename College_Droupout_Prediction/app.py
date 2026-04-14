@@ -1,42 +1,20 @@
 
 import os
-import sqlite3
+import mysql.connector
 
 from flask import Flask, redirect, render_template, request, url_for
 
 app = Flask(__name__)
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "students.db")
-
-
 def get_db_connection():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="Khaja@123",
+        database="dropout_prediction"
+    )
     return conn
 
-
-def initialize_database():
-    conn = get_db_connection()
-    conn.execute(
-        """
-        CREATE TABLE IF NOT EXISTS Student (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            gender TEXT DEFAULT 'Girl',
-            age INTEGER,
-            class_name TEXT,
-            attendance INTEGER,
-            marks INTEGER,
-            parental_support TEXT,
-            family_income TEXT,
-            risk_label TEXT,
-            risk_score INTEGER,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        """
-    )
-    conn.commit()
-    conn.close()
 
 
 def calculate_girl_dropout_risk(data):
@@ -83,33 +61,122 @@ def calculate_girl_dropout_risk(data):
 def save_prediction(data, risk_label, risk_score):
     try:
         conn = get_db_connection()
-        conn.execute(
+        cursor = conn.cursor()
+
+        # 1) Insert into student table
+        cursor.execute(
             """
-            INSERT INTO Student(
-                name, gender, age, class_name,
-                attendance, marks, parental_support, family_income,
-                risk_label, risk_score
-            )
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO student (name, age, class, school_name, location)
+            VALUES (%s, %s, %s, %s, %s)
             """,
             (
                 data["name"],
-                "Girl",
                 data["age"],
                 data["class_name"],
-                data["attendance"],
-                data["marks"],
-                data["parental_support"],
-                data["family_income"],
-    
-                risk_label,
-                risk_score,
-            ),
+                None,   # leave as NULL
+                None    # leave as NULL
+            )
         )
+
+        # get newly created student id
+        student_id = cursor.lastrowid
+
+        # 2) Insert into attendance table
+        cursor.execute(
+            """
+            INSERT INTO attendance
+            (student_id, total_days, present_days, attendance_percentage)
+            VALUES (%s, %s, %s, %s)
+            """,
+            (
+                student_id,
+                200,
+                int((data["attendance"] / 100) * 200),
+                data["attendance"]
+            )
+        )
+
+        # 3) Insert into academic performance
+        marks = data["marks"]
+
+        if marks >= 80:
+            grade = "A"
+        elif marks >= 60:
+            grade = "B"
+        elif marks >= 40:
+            grade = "C"
+        else:
+            grade = "D"
+
+        cursor.execute(
+            """
+            INSERT INTO academic_performance
+            (student_id, subject, marks, grade)
+            VALUES (%s, %s, %s, %s)
+            """,
+            (
+                student_id,
+                None,   # subject not asked on website -> NULL
+                marks,
+                grade
+            )
+        )
+
+        # 4) Insert into family background
+        income_map = {
+            "low": 15000,
+            "medium": 30000,
+            "high": 50000
+        }
+
+        parent_income = income_map.get(
+            data["family_income"], None
+        )
+
+        financial_support = (
+            "No"
+            if data["parental_support"] == "low"
+            else "Yes"
+        )
+
+        cursor.execute(
+            """
+            INSERT INTO family_background
+            (student_id, parent_income,
+             parent_education, family_size,
+             financial_support)
+            VALUES (%s, %s, %s, %s, %s)
+            """,
+            (
+                student_id,
+                parent_income,
+                None,   # NULL
+                None,   # NULL
+                financial_support
+            )
+        )
+
+        # 5) Insert into prediction result
+        cursor.execute(
+            """
+            INSERT INTO prediction_result
+            (student_id, risk_level, prediction_date)
+            VALUES (%s, %s, CURDATE())
+            """,
+            (
+                student_id,
+                risk_label
+            )
+        )
+
         conn.commit()
+        cursor.close()
         conn.close()
+
         return True
-    except Exception:
+
+    except Exception as e:
+        print("Database Error:", e)
         return False
 
 
@@ -147,27 +214,47 @@ def predict():
 @app.route("/students")
 def students():
     conn = get_db_connection()
-    records = conn.execute(
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute(
         """
-        SELECT id, name, age, class_name, attendance, marks,
-               parental_support, family_income, risk_label, risk_score, created_at
+        SELECT id, name, age, class_name,
+               attendance, marks,
+               parental_support, family_income,
+               risk_label, risk_score, created_at
         FROM Student
         ORDER BY id DESC
         """
-    ).fetchall()
+    )
+
+    records = cursor.fetchall()
+
+    cursor.close()
     conn.close()
-    return render_template("students.html", students=records, current_page="students")
+
+    return render_template(
+        "students.html",
+        students=records,
+        current_page="students"
+    )
 
 
 @app.route("/delete-student/<int:student_id>", methods=["POST"])
 def delete_student(student_id):
     conn = get_db_connection()
-    conn.execute("DELETE FROM Student WHERE id = ?", (student_id,))
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "DELETE FROM Student WHERE id = %s",
+        (student_id,)
+    )
+
     conn.commit()
+    cursor.close()
     conn.close()
+
     return redirect(url_for("students"))
 
 
 if __name__ == "__main__":
-    initialize_database()
     app.run(debug=True)
