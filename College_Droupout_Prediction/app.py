@@ -222,12 +222,27 @@ def students():
 
     cursor.execute(
         """
-        SELECT id, name, age, class_name,
-               attendance, marks,
-               parental_support, family_income,
-               risk_label, risk_score, created_at
-        FROM Student
-        ORDER BY id DESC
+        SELECT
+            s.student_id,
+            s.name,
+            s.age,
+            s.class,
+            a.attendance_percentage,
+            ap.marks,
+            fb.financial_support,
+            fb.parent_income,
+            pr.risk_level,
+            pr.prediction_date
+        FROM student s
+        LEFT JOIN attendance a
+            ON s.student_id = a.student_id
+        LEFT JOIN academic_performance ap
+            ON s.student_id = ap.student_id
+        LEFT JOIN family_background fb
+            ON s.student_id = fb.student_id
+        LEFT JOIN prediction_result pr
+            ON s.student_id = pr.student_id
+        ORDER BY s.student_id DESC
         """
     )
 
